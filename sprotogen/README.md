@@ -1,0 +1,1 @@
+将原文件和github.com/davyxu/gosproto合并，使用参数-java_out生成java的协议文件
