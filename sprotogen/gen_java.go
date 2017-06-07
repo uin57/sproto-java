@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	//"github.com/davyxu/gosproto/meta"
 	"github.com/davyxu/gosproto/meta"
 	"io/ioutil"
 	"os"
@@ -110,6 +111,15 @@ func (self *fieldModel) JavaDecodeMethodName() string {
 		}
 	case meta.FieldType_Struct:
 		if self.Repeatd {
+			if self.MainIndex != nil {
+				tmpFm := &fieldModel{
+					FieldDescriptor: self.MainIndex,
+					FieldIndex:      0,
+					st:              self.st,
+				}
+
+				return fmt.Sprintf("decoder.readMap(new HashMap<>(),%s::new,%s::get%s)", self.GetFullComplexClassName(), self.GetFullComplexClassName(), tmpFm.UpperName())
+			}
 			return fmt.Sprintf("decoder.readList(new LinkedList<>(),%s::new)", self.GetFullComplexClassName())
 		} else {
 			return fmt.Sprintf("decoder.readObject(%s::new)", self.GetFullComplexClassName())
@@ -157,6 +167,9 @@ func (self *fieldModel) JavaEncodeMethodName() string {
 		}
 	case meta.FieldType_Struct:
 		if self.Repeatd {
+			if self.MainIndex != nil {
+				return fmt.Sprintf("encoder.writeObjectList(%d,%s.values())", self.FieldIndex, self.Name)
+			}
 			return fmt.Sprintf("encoder.writeObjectList(%d,%s)", self.FieldIndex, self.Name)
 		} else {
 			return fmt.Sprintf("encoder.writeObject(%d,%s)", self.FieldIndex, self.Name)
@@ -203,12 +216,17 @@ func (self *fieldModel) JavaFieldTypeName() string {
 		meta.FieldType_Enum:
 		{
 			if self.Repeatd {
-				//if self.MainIndex!=nil{
-				//	b.WriteString("Map<")
-				//	b.WriteString(self.MainIndex.Ja)
-				//}else{
+				if self.MainIndex != nil {
+					tmpFm := &fieldModel{
+						FieldDescriptor: self.MainIndex,
+						FieldIndex:      0,
+						st:              self.st,
+					}
+					b.WriteString("Map<" + tmpFm.JavaFieldTypeName() + ",")
+					b.WriteString(self.GetFullComplexClassName() + ">")
+				} else {
 					b.WriteString("List<" + self.GetFullComplexClassName() + ">")
-				//}
+				}
 			} else {
 				b.WriteString(self.GetFullComplexClassName())
 			}
