@@ -3,6 +3,7 @@ package sproto;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
 
 public class Encoder {
@@ -182,7 +183,7 @@ public class Encoder {
         enc.writeTo(chunk);
     }
 
-    public void writeObjectList(int tag,List<? extends SprotoObject> list){
+    public void writeObjectList(int tag,Collection<? extends SprotoObject> list){
         checkAndFillTag(tag);
         growBuffer(2,4);
         header.putShort((short)0);
